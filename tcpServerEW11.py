@@ -2,6 +2,16 @@ import socket
 import sys
 from collections import deque
 import binascii
+from colorama import Fore, Back, Style
+
+def todo(inStr):
+    print(f"{Back.YELLOW}{Fore.BLACK}TODO : {inStr}{Style.RESET_ALL}")
+    
+def error(inStr):
+    print(f"{Back.RED}{Fore.BLACK}ERROR : {inStr}{Style.RESET_ALL}")
+    
+def dbg(inStr):
+    print(f"{Back.GREEN}{Fore.BLACK}DBG : {inStr}{Style.RESET_ALL}")
 
 class ModbusFrame:
     def __init__(self):
@@ -16,6 +26,9 @@ class ModbusFrame:
         self.quantity = 0
         self.startingAddr = -1
         
+        self.byteCount = -1
+        self.registersValues = []
+        
     def to_bytes(self):
         """Convertir la trame Modbus en une séquence d'octets."""
         frame_bytes = bytes([self.address, self.function_code]) + self.data
@@ -26,19 +39,34 @@ class ModbusFrame:
         self.isValid = self.check_CRC()
         
         if (self.isValid):
-            try:
-                self.slave=self.data[0]
-                self.function=self.data[1]
-                if len(self.data) != 5 + self.data[2]:
+            self.slave=self.data[0]
+            self.function=self.data[1]
+            if self.function > 0x80:
+                self.isRequest = False
+                todo("Traiter les réponses d'erreur de type : 65 83 02 812e")
+            elif self.function == 16:
+                self.startingAddr = self.data[2] << 8 | self.data[3]
+                self.quantity = self.data[4] << 8 | self.data[5]
+                if len(self.data) == 8:
+                    self.isRequest = False
+                else:
                     self.isRequest = True
-                if self.isRequest == True:
-                    self.startingAddr = self.data[2] << 8 | self.data[3]
-                    print ("startingAddr = ", hex(self.startingAddr))
-                    self.quantity = self.data[4] << 8 | self.data[5]
-                    print ("Quantity = ", hex(self.quantity))
-            except:
-                print("ERREUR processing ",self.data)
-                self.isValid = False
+                    self.byteCount = self.data[6]
+                    for i in range(self.quantity):
+                        regVal = self.data[7 + 2 * i] << 8 | self.data[8 + 2 * i]
+                        self.registersValues.append(regVal)
+            else:
+                if len(self.data) != 5 + self.data[2]:
+                    try:
+                        self.isRequest = True
+                        self.startingAddr = self.data[2] << 8 | self.data[3]
+                        self.quantity = self.data[4] << 8 | self.data[5]
+                    except:
+                        error(f"Processing Request function {self.function} {self.data:X}")
+                else:
+                    self.isRequest = False
+                    todo("Traiter les réponses de fonction 1")
+              
         return self.isValid
             
         
@@ -97,13 +125,21 @@ class ModbusFrame:
         hex_data = binascii.hexlify(curFrame.data).decode('utf-8')
         print("-----------------------------")
         print("-- Données brutees :",hex_data)
-        print("--", "Request" if curFrame.isRequest else "Response")
+        print("--", f"{Fore.YELLOW}Request{Style.RESET_ALL}" if curFrame.isRequest else f"{Fore.GREEN}Response{Style.RESET_ALL}")
         print("-- * slave    :",self.slave)
         print("-- * function :",self.function)
         if curFrame.isRequest == True:
-            print("--   * starting address :",hex(self.startingAddr))
-            print("--   * quantity         :",self.quantity)
-        print("-- * crc      :",self.crc)
+            print(f"--   * starting address : 0x{self.startingAddr:04X} ({self.startingAddr})")
+            print(f"--   * quantity         : {self.quantity}")
+            if curFrame.function == 16:
+                print(f"--   * byte count       : {self.byteCount}")
+                hexa = ' '.join(f"{element:04X}" for element in self.registersValues)
+                print(f"--   * registers values : [{hexa}]")
+                
+        else :
+            todo("Afficher les réponses")
+            
+        print("-- * crc      :","0x{:04X}".format(self.crc))
             
 
 
@@ -139,7 +175,7 @@ while True:
         break
     hex_data = binascii.hexlify(data).decode('utf-8')
 
-    print("------------Reception de : ",hex_data)
+    # print("------------Reception de : ",hex_data)
 
     # Traitement des données une par une
     for byte in data:
@@ -150,7 +186,7 @@ while True:
             curFrame = ModbusFrame()
 
     if ret == False:
-        print ("ERREUR")
+        print ("ERREUR pas possible d'obtenir une frame valide")
         curFrame = ModbusFrame()
 
 # Fermer les sockets
