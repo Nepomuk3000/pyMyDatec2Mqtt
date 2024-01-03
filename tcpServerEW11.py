@@ -43,6 +43,30 @@ while True:
         ret = curFrame.add_bytes(byte.to_bytes(1, 'big'))
         if ret:
             curFrame.print()
+            if curFrame.slave == 247 and curFrame.isRequest:
+                log.todo(f"Envoyer la réponse à la demande de trame {curFrame.startingAddr:04X}")
+                responseFrame = ModbusFrame()
+                responseFrame.isRequest = False
+                responseFrame.slave = curFrame.slave
+                responseFrame.function = curFrame.function    
+                           
+                if curFrame.function == 3 : 
+                    if curFrame.startingAddr == 2:
+                        responseFrame.byteCount = 14
+                        responseFrame.pdu=b'\x00\x00\x41\xA0\x00\x00\x41\xB0\x00\x01\x00\x00\x00\x00'
+                        
+                    elif curFrame.startingAddr == 12:
+                        responseFrame.byteCount = 2
+                        responseFrame.pdu=b'\x00\x00'   
+                                  
+                if curFrame.function == 16 : 
+                    responseFrame.startingAddr = curFrame.startingAddr
+                    responseFrame.quantity = curFrame.quantity
+                    
+                data = responseFrame.to_bytes()
+                responseFrame.print()
+                #client_socket.send(data)
+                #log.dbg(type(data))
             curFrame = ModbusFrame()
 
     if ret == False:

@@ -2,6 +2,7 @@ import binascii
 from colorama import Fore, Back, Style
 import constants
 import log
+import struct
 
 class ModbusFrame:
     def __init__(self):
@@ -19,10 +20,22 @@ class ModbusFrame:
         self.byteCount = -1
         self.registersValues = []
         
+        self.pdu = b''
+
     def to_bytes(self):
-        """Convertir la trame Modbus en une séquence d'octets."""
-        frame_bytes = bytes([self.address, self.function_code]) + self.data
-        return frame_bytes
+        if not self.isRequest:
+            if self.function == 3:
+                self.data = struct.pack('@BBB', self.slave, self.function, self.byteCount)
+                self.data += self.pdu
+                shortCount = int(self.byteCount / 2)
+                for i in range(shortCount):
+                    regVal = self.data[3 + 2 * i] << 8 | self.data[4 + 2 * i]
+                    self.registersValues.append(regVal)
+            else:
+                self.data = struct.pack('>BBHH', self.slave, self.function, self.startingAddr, self.quantity )
+            self.data += self.calculate_CRC(self.data).to_bytes(2, byteorder='big')  
+
+            return self.data
     
     def add_bytes(self,inByte):
         self.data += inByte
@@ -66,19 +79,21 @@ class ModbusFrame:
         return self.isValid
             
         
+    def calculate_CRC(self,data):
+        crc = 0xFFFF  # Initialiser la valeur du CRC
+
+        for byte in data:
+            index = (crc ^ byte) & 0xFF
+            crc = (crc >> 8) ^ constants.crc_table[index]
+        return ((crc & 0xFF) << 8) | ((crc >> 8) & 0xFF)
+        
     def check_CRC(self):
         if len(self.data) < 4:
             return False
         else:
             expectedCRC = self.data[-2] * 256 + self.data[-1]
             dataWithoutCRC = self.data[:-2]
-
-            crc = 0xFFFF  # Initialiser la valeur du CRC
-
-            for byte in dataWithoutCRC:
-                index = (crc ^ byte) & 0xFF
-                crc = (crc >> 8) ^ constants.crc_table[index]
-            self.crc = ((crc & 0xFF) << 8) | ((crc >> 8) & 0xFF)
+            self.crc = self.calculate_CRC(dataWithoutCRC)
 
             return self.crc == expectedCRC
 
