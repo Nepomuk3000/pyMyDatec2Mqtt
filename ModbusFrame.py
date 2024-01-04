@@ -109,7 +109,11 @@ class ModbusFrame:
         txt = constants.functions[str(self.function)]
         print("-- * function :",f"{Back.MAGENTA}" if self.function == 16 else f"{Back.BLUE}",self.function,txt,f"{Style.RESET_ALL}")
         if self.isRequest == True:
-            txt = constants.registers[str(self.startingAddr)]
+            try:
+                txt = constants.registers[str(self.startingAddr)]
+            except:
+                txt = f"Unknown register name for address : 0x{self.startingAddr:04X}"
+                log.error(txt)
             print(f"--   * starting address : 0x{self.startingAddr:04X} ({self.startingAddr})  {txt}")
             print(f"--   * quantity         : {self.quantity}")
             if self.function == 16:
