@@ -40,6 +40,13 @@ functions = {
     '131':'ERREUR'
 }
 
+status = {
+    '0':'Ventilation',
+    '1':'Tempo Chauffage',
+    '2':'Chauffage',
+    '3':'Free Cooling'   
+}
+
 registers = {
     '0':'R Température capteur Sensair',
     '1':'R Humidité capteur Sensair',
@@ -113,14 +120,14 @@ registers = {
     '9071':'Hygrométrie Etalonnée Sensair',
 
     '1':'Valeur du mode de fonctionnement (envoi sur device distant)',
-    '9':'Temperature Etalonnée de l’écran (envoi sur device distant)',
-    '11':'Temperature Etalonnée du Sensair (envoi sur device distant)',
+    '2':'R&W Température de consigne zone Ecran',
+    '4':'R&W Température de consigne zone Sensair',
     '6':'R&W ON / OFF status',
     '7':'R&W HIVER / ETE status',
     '8':'R&W ECO / BOOST status',
+    '9':'Temperature Etalonnée de l’écran (envoi sur device distant)',
+    '11':'Temperature Etalonnée du Sensair (envoi sur device distant)',
     '12':'R&W MANU / PROG status',
-    '2':'R&W Température de consigne zone Ecran',
-    '4':'R&W Température de consigne zone Sensair',
     '13':'@@@@ UNKNOWN  @@@@',
     '14':'@@@@ UNKNOWN  @@@@',
     '15':'@@@@ UNKNOWN  @@@@',

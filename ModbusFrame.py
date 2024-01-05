@@ -36,9 +36,8 @@ class ModbusFrame:
             self.data += self.calculate_CRC(self.data).to_bytes(2, byteorder='big')  
 
             return self.data
-    
-    def add_bytes(self,inByte):
-        self.data += inByte
+        
+    def is_complete(self):
         self.isValid = self.check_CRC()
         
         if (self.isValid):
@@ -77,7 +76,9 @@ class ModbusFrame:
                         self.registersValues.append(regVal)
               
         return self.isValid
-            
+    
+    def add_bytes(self,inByte):
+        self.data += inByte            
         
     def calculate_CRC(self,data):
         crc = 0xFFFF  # Initialiser la valeur du CRC
@@ -100,8 +101,10 @@ class ModbusFrame:
     def print(self):
         hex_data = binascii.hexlify(self.data).decode('utf-8')
         # TODO Mettre un filtre configurable 
-        # if self.slave != 247 or self.function != 3:
+        #if self.startingAddr != 16471:
         #     print("return")
+        
+        
         print("---------------------------------------------------------------------------------------")
         print("-- Données brutees :",hex_data)
         print("--", f"{Back.CYAN}{Fore.BLACK}Request{Style.RESET_ALL}" if self.isRequest else f"{Back.GREEN}{Fore.BLACK}Response{Style.RESET_ALL}")
