@@ -2,8 +2,10 @@ import paho.mqtt.client as mqtt
 import binascii
 from struct import *
 import json
-from ew11Binding import ew11Binding
-
+import ew11Binding
+from MyDatecData import MyDatecData
+import threading
+import time
 
 class mqttBinding:
     
@@ -28,6 +30,9 @@ class mqttBinding:
         self.client.username_pw_set(username, password)
         self.client.connect(broker_address, broker_port, 60)
 
+        self.thread = threading.Thread(target=self.send)
+
+        
         # Boucle principale du client
         self.client.loop_forever()
 
@@ -36,6 +41,13 @@ class mqttBinding:
         print(f"Connecté au broker avec le code de retour {rc}")
         # Abonnez-vous au topic
         self.client.subscribe(self.topic)
+        self.thread.start()
+        
+    def send(self):
+        while True:
+            message = MyDatecData.toJson()
+            self.client.publish("mydatec/status", message)
+            time.sleep(1)
 
     # Callback appelée lorsqu'un message est reçu du broker
     def on_message(self, client, userdata, msg):
@@ -47,12 +59,7 @@ class mqttBinding:
     def process_binary_payload(self, binary_data):
         # Ajoutez ici votre logique de traitement pour les données binaires
         # par exemple, décoder les données binaires et effectuer une action en conséquence
-        hex_data = binascii.hexlify(binary_data).decode('utf-8')
-        print("Traitement des données binaires : ", binary_data)
-        
-        
         donnees = json.loads(binary_data)
-                             
                              
         # Accéder aux données
         t1 =  donnees.get('t1', None)
@@ -60,18 +67,15 @@ class mqttBinding:
         pac =  donnees.get('pac', None)
         cold =  donnees.get('cold', None)
         boost =  donnees.get('boost', None)
-        
-        
-        if t1:
+
+        if t1 != None :
             self.ew11Binding.setConfig("t1",t1)
-        if t2:
+        if t2 != None :
             self.ew11Binding.setConfig("t2",t2)
-        if pac:
+        if pac != None :
             self.ew11Binding.setConfig("pac",pac)
-        if cold:
+        if cold != None :
             self.ew11Binding.setConfig("cold",cold)
-        if boost:
+        if boost != None :
             self.ew11Binding.setConfig("boost",boost)
-        # Afficher les données
-        print(f"T1: {t1}, T2: {t2}, pac: {pac}, cold: {cold}, boost: {boost}")
 

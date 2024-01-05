@@ -9,6 +9,7 @@ class ModbusFrame:
         self.data = b''
         self.isValid = False
         self.isRequest = False
+        self.request = None
         
         self.slave = -1
         self.function = -1
@@ -97,6 +98,35 @@ class ModbusFrame:
             self.crc = self.calculate_CRC(dataWithoutCRC)
 
             return self.crc == expectedCRC
+        
+    def registersValuesToHex(self):
+        return ' '.join(f"{element:04X}" for element in self.registersValues)
+
+    def getIdStr(self):
+        if self.isRequest:
+            addr = self.startingAddr
+        else:
+            try:
+                addr = self.request.startingAddr
+            except:
+                addr = -1
+        return f"{self.slave}_{self.function}_{addr}_{self.isRequest}"
+
+    def isId(self,slave=None,function=None,startingAddr=None):
+        ret = True
+        if slave:
+            ret &= self.slave == slave
+        if function:
+            ret &= self.function == function
+        if startingAddr:
+            if self.isRequest:
+                ret &= self.startingAddr == startingAddr
+            else:
+                try:
+                    ret &= self.request.startingAddr == startingAddr
+                except:
+                    ret = False
+        return ret
 
     def print(self):
         hex_data = binascii.hexlify(self.data).decode('utf-8')
@@ -112,30 +142,44 @@ class ModbusFrame:
         txt = constants.functions[str(self.function)]
         print("-- * function :",f"{Back.MAGENTA}" if self.function == 16 else f"{Back.BLUE}",self.function,txt,f"{Style.RESET_ALL}")
         if self.isRequest == True:
-            try:
-                txt = constants.registers[str(self.startingAddr)]
-            except:
-                txt = f"Unknown register name for address : 0x{self.startingAddr:04X}"
-                log.error(txt)
-            print(f"--   * starting address : 0x{self.startingAddr:04X} ({self.startingAddr})  {txt}")
+            strStartingAddr = self.startingAddrToStr()
+            print(f"--   * starting address : {strStartingAddr}")
+
             print(f"--   * quantity         : {self.quantity}")
             if self.function == 16:
                 print(f"--   * byte count       : {self.byteCount}")
-                hexa = ' '.join(f"{element:04X}" for element in self.registersValues)
-                print(f"--   * registers values : [{hexa}]")
+                print(f"--   * registers values : [{self.registersValues}]")
+                print(f"--                        [{self.registersValuesToHex()}]")
                 
         else :
             if self.function < 0x80:
                 if self.function == 3:
                     print(f"--   * byte count       : {self.byteCount}")
-                    hexa = ' '.join(f"{element:04X}" for element in self.registersValues)
-                    print(f"--   * registers values : [{hexa}]")
+                    print(f"--   * registers values : [{self.registersValues}]")
+                    print(f"--                        [{self.registersValuesToHex()}]")
                 else:
                     txt = constants.registers[str(self.startingAddr)]
                     print(f"--   * starting address : 0x{self.startingAddr:04X} ({self.startingAddr}) {txt}")
                     print(f"--   * quantity         : {self.quantity}")
             else:
                 log.todo("Traiter les erreurs") 
+                
+    def startingAddrToStr(self):
+        if self.isRequest:
+            startingAddr = self.startingAddr
+        else:
+            if not self.request:
+                log.error(f"No request for response {self.getIdStr()}")
+                startingAddr = -1
+            else:
+                startingAddr = self.request.startingAddr
+            
+        try:
+            txt = constants.registers[str(startingAddr)]
+        except:
+            txt = f"Unknown register name for address : 0x{startingAddr:04X}"
+            log.error(txt)
+        return (f"0x{startingAddr:04X} ({startingAddr})  {txt}")
             
         # print("-- * crc      :","0x{:04X}".format(self.crc))
             

@@ -41,10 +41,10 @@ functions = {
 }
 
 status = {
-    '0':'Ventilation',
-    '1':'Tempo Chauffage',
-    '2':'Chauffage',
-    '3':'Free Cooling'   
+    0:'Ventilation',
+    1:'Tempo Chauffage',
+    2:'Chauffage',
+    3:'Free Cooling'   
 }
 
 registers = {
