@@ -51,9 +51,14 @@ class mqttBinding:
 
     # Callback appelée lorsqu'un message est reçu du broker
     def on_message(self, client, userdata, msg):
-        #print(f"Message reçu du topic {msg.topic}: {msg.payload}")
-        # Traitement des données binaires
-        self.process_binary_payload(msg.payload)
+        if msg.topic == "mydatec/pac":
+            self.ew11Binding.setConfig("pac",msg.payload)
+        elif msg.topic == "mydatec/froid":
+            self.ew11Binding.setConfig("cold",msg.payload)
+        elif msg.topic == "mydatec/boost":
+            self.ew11Binding.setConfig("boost",msg.payload)
+        elif msg.topic == "mydatec/set":
+            self.process_binary_payload(msg.payload)
 
     # Fonction de traitement des données binaires
     def process_binary_payload(self, binary_data):

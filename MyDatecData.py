@@ -21,6 +21,11 @@ class MyDatecData:
     TempsRestantFiltre = -1
     StatusCode = -1
     Status = "Not set"
+    Pac = False
+    Froid = False
+    Boost = False
+    ConsigneZoneJour = 20
+    ConsigneZoneNuit = 22
     
     @classmethod
     def toJson(cls):
@@ -53,5 +58,14 @@ class MyDatecData:
         data['Etat'] = {}
         data['Etat']['Code'] = MyDatecData.StatusCode
         data['Etat']['Texte'] = MyDatecData.Status
+        
+        data['Mode'] = {}
+        data['Mode']['Pac'] = MyDatecData.Pac
+        data['Mode']['Froid'] = MyDatecData.Froid
+        data['Mode']['Boost'] = MyDatecData.Boost
+        
+        data['Consigne'] = {}
+        data['Consigne']['ZoneJour'] = MyDatecData.ConsigneZoneJour
+        data['Consigne']['ZoneNuit'] = MyDatecData.ConsigneZoneNuit
         
         return json.dumps(data,indent=2)

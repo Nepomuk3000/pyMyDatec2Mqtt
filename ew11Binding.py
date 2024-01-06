@@ -43,6 +43,10 @@ class ew11Binding:
         
     def setConfig(self,label,value):
         self.mutex.acquire()
+        if value == b'true':
+            value = 1
+        elif value == b'false':
+            value = 0
         self.config[label] = value
         with open('config/config.json', 'w') as jsonfile:
             json.dump(self.config, jsonfile, indent=2)
@@ -135,7 +139,6 @@ class ew11Binding:
                     txt="Unknown"
                 MyDatecData.StatusCode=statusCode
                 MyDatecData.Status=statusStr
-                         
             data = responseFrame.to_bytes()
             self.client_socket.send(data)
         
@@ -143,10 +146,10 @@ class ew11Binding:
         if curFrame.isId(1,16,9048):
             MyDatecData.TemperatureEcran = curFrame.registersValues[0]/10
             
-        if curFrame.isId(1,16,9070):
+        elif curFrame.isId(1,16,9070):
             MyDatecData.TemperatureEtalonneeNuit = curFrame.registersValues[0]/10
             
-        if curFrame.isId(1,16,9071):
+        elif curFrame.isId(1,16,9071):
             MyDatecData.HygrometrieEtalonneeNuit = curFrame.registersValues[0]
             
         # Traitement de la consigne de température zone jour par l'écran
@@ -155,6 +158,7 @@ class ew11Binding:
             bTemperature = struct.pack('BBBB',bytes_data[3],bytes_data[2],bytes_data[1],bytes_data[0])
             temperature = struct.unpack('>f', bTemperature)[0]
             if self.precT1ConsigneEcran != temperature:
+                MyDatecData.ConsigneZoneJour = temperature
                 self.setConfig('t1',temperature)
                 self.precT1ConsigneEcran = temperature
         
@@ -164,6 +168,7 @@ class ew11Binding:
             bTemperature = struct.pack('BBBB',bytes_data[3],bytes_data[2],bytes_data[1],bytes_data[0])
             temperature = struct.unpack('>f', bTemperature)[0]
             if self.precT2ConsigneEcran != temperature:
+                MyDatecData.ConsigneZoneNuit = temperature
                 self.setConfig('t2',temperature)
                 self.precT2ConsigneEcran = temperature
         
@@ -171,6 +176,10 @@ class ew11Binding:
         elif curFrame.isId(1,startingAddr=16476):   
             val = curFrame.registersValues[0]
             if self.precPacConsigneEcran != val:
+                if val == 1:
+                    MyDatecData.Pac = True
+                else:
+                    MyDatecData.Pac = False
                 self.setConfig('pac',val)
                 self.precPacConsigneEcran = val
 
@@ -178,6 +187,10 @@ class ew11Binding:
         elif curFrame.isId(startingAddr=16477):
             val = curFrame.registersValues[0]
             if self.precColdConsigneEcran != val:
+                if val == 1:
+                    MyDatecData.Froid = True
+                else:
+                    MyDatecData.Froid = False
                 self.setConfig('cold',val)
                 self.precColdConsigneEcran = val
 
@@ -185,10 +198,14 @@ class ew11Binding:
         elif curFrame.isId(startingAddr=16478):
             val = curFrame.registersValues[0]
             if self.precBoostConsigneEcran != val:
+                if val == 1:
+                    MyDatecData.Boost = True
+                else:
+                    MyDatecData.Boost = False
                 self.setConfig('boost',val)
-                self.precBoostConsigneEcran = val
+                self.precBoostConsigneEcran = val        
                 
-    def processResponse(self,curFrame):       
+    def processResponse(self,curFrame):  
         
         # Réponse du capteur de la zone Jour
         if curFrame.isId(11,3,4):

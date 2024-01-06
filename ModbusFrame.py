@@ -128,7 +128,9 @@ class ModbusFrame:
                     ret = False
         return ret
 
-    def print(self):
+    def print(self,slave=None,function=None,startingAddr=None):
+        if not self.isId(slave,function,startingAddr):
+            return
         hex_data = binascii.hexlify(self.data).decode('utf-8')
         # TODO Mettre un filtre configurable 
         #if self.startingAddr != 16471:
