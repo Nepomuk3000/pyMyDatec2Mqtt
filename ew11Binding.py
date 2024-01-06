@@ -15,6 +15,7 @@ class ew11Binding:
     showRegisters = False
     
     def __init__(self, inHost='0.0.0.0', inPort=10004):
+            
         # Création du socket
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -27,9 +28,6 @@ class ew11Binding:
         
         self.previousReq = None
         
-        with open('config/config.json', 'r') as jsonfile:
-            self.config = json.load(jsonfile)
-        
         self.status = 0
         
         self.precT1ConsigneEcran = -1
@@ -40,17 +38,6 @@ class ew11Binding:
     
     def start(self):
         self.thread.start()
-        
-    def setConfig(self,label,value):
-        self.mutex.acquire()
-        if value == b'true':
-            value = 1
-        elif value == b'false':
-            value = 0
-        self.config[label] = value
-        with open('config/config.json', 'w') as jsonfile:
-            json.dump(self.config, jsonfile, indent=2)
-        self.mutex.release()
         
     def main(self):
         self.stop = False
@@ -63,8 +50,6 @@ class ew11Binding:
 
         curFrame = ModbusFrame()
         # Boucle de traitement des données
-        
-        
         precFrame = {}
         while not self.stop :
             # Recevoir les données du client
@@ -137,20 +122,20 @@ class ew11Binding:
                     statusStr=constants.status[statusCode]
                 except:
                     txt="Unknown"
-                MyDatecData.StatusCode=statusCode
-                MyDatecData.Status=statusStr
+                MyDatecData['Statut']['Etat']['Code']=statusCode
+                MyDatecData['Statut']['Etat']['Texte']=statusStr
             data = responseFrame.to_bytes()
             self.client_socket.send(data)
         
         # Traitement de l'information température interne de l'écran
         if curFrame.isId(1,16,9048):
-            MyDatecData.TemperatureEcran = curFrame.registersValues[0]/10
+            MyDatecData['Statut']['ZoneJour']['TemperatureEcran'] = curFrame.registersValues[0]/10
             
         elif curFrame.isId(1,16,9070):
-            MyDatecData.TemperatureEtalonneeNuit = curFrame.registersValues[0]/10
+            MyDatecData['Statut']['ZoneNuit']['TemperatureEtalonnee'] = curFrame.registersValues[0]/10
             
         elif curFrame.isId(1,16,9071):
-            MyDatecData.HygrometrieEtalonneeNuit = curFrame.registersValues[0]
+            MyDatecData['Statut']['ZoneNuit']['HygrometrieEtalonnee'] = curFrame.registersValues[0]
             
         # Traitement de la consigne de température zone jour par l'écran
         elif curFrame.isId(1,16,16471):  
@@ -158,8 +143,7 @@ class ew11Binding:
             bTemperature = struct.pack('BBBB',bytes_data[3],bytes_data[2],bytes_data[1],bytes_data[0])
             temperature = struct.unpack('>f', bTemperature)[0]
             if self.precT1ConsigneEcran != temperature:
-                MyDatecData.ConsigneZoneJour = temperature
-                self.setConfig('t1',temperature)
+                MyDatecData['Consigne']['Temperature']['ZoneJour'] = temperature
                 self.precT1ConsigneEcran = temperature
         
         # Traitement de la consigne de température zone nuit par l'écran
@@ -168,69 +152,56 @@ class ew11Binding:
             bTemperature = struct.pack('BBBB',bytes_data[3],bytes_data[2],bytes_data[1],bytes_data[0])
             temperature = struct.unpack('>f', bTemperature)[0]
             if self.precT2ConsigneEcran != temperature:
-                MyDatecData.ConsigneZoneNuit = temperature
-                self.setConfig('t2',temperature)
+                MyDatecData['Consigne']['Temperature']['ZoneNuit'] = temperature
                 self.precT2ConsigneEcran = temperature
         
         # Traitement de la consigne pac ON / pac OFF par l'écran
         elif curFrame.isId(1,startingAddr=16476):   
             val = curFrame.registersValues[0]
             if self.precPacConsigneEcran != val:
-                if val == 1:
-                    MyDatecData.Pac = True
-                else:
-                    MyDatecData.Pac = False
-                self.setConfig('pac',val)
+                MyDatecData['Consigne']['Mode']['Pac'] = val
                 self.precPacConsigneEcran = val
 
         # Traitement de la consigne froid / chaud par l'écran
         elif curFrame.isId(startingAddr=16477):
             val = curFrame.registersValues[0]
             if self.precColdConsigneEcran != val:
-                if val == 1:
-                    MyDatecData.Froid = True
-                else:
-                    MyDatecData.Froid = False
-                self.setConfig('cold',val)
+                MyDatecData['Consigne']['Mode']['Froid'] = val
                 self.precColdConsigneEcran = val
 
         # Traitement de la consigne boost ON / boost OFF par l'écran
         elif curFrame.isId(startingAddr=16478):
             val = curFrame.registersValues[0]
             if self.precBoostConsigneEcran != val:
-                if val == 1:
-                    MyDatecData.Boost = True
-                else:
-                    MyDatecData.Boost = False
-                self.setConfig('boost',val)
+                MyDatecData['Consigne']['Mode']['Boost'] = val
                 self.precBoostConsigneEcran = val        
                 
     def processResponse(self,curFrame):  
         
         # Réponse du capteur de la zone Jour
         if curFrame.isId(11,3,4):
-            MyDatecData.TemperatureCapteurJour = curFrame.registersValues[0]/10
-            MyDatecData.HygrometrieCapteurJour = curFrame.registersValues[1]
-            MyDatecData.CO2CapteurJour = curFrame.registersValues[2]
+            MyDatecData['Statut']['ZoneJour']['TemperatureBrute'] = curFrame.registersValues[0]/10
+            MyDatecData['Statut']['ZoneJour']['HygrometrieBrute'] = curFrame.registersValues[1]
+            MyDatecData['Statut']['ZoneJour']['COV'] = curFrame.registersValues[2]
         
         # Réponse du capteur de la zone Nuit
         if curFrame.isId(12,3,4):
-            MyDatecData.TemperatureCapteurNuit = curFrame.registersValues[0]/10
-            MyDatecData.HygrometrieCapteurNuit = curFrame.registersValues[1]
-            MyDatecData.CO2CapteurNuit = curFrame.registersValues[2]
+            MyDatecData['Statut']['ZoneNuit']['TemperatureBrute'] = curFrame.registersValues[0]/10
+            MyDatecData['Statut']['ZoneNuit']['HygrometrieBrute'] = curFrame.registersValues[1]
+            MyDatecData['Statut']['ZoneNuit']['COV'] = curFrame.registersValues[2]
         
         # Réponse de la VMC concernant les températures en entrée et sortie
         if curFrame.isId(1,3,9002):
-            MyDatecData.AirExtrait = curFrame.registersValues[2]/10
-            MyDatecData.AirRejete = curFrame.registersValues[3]/10
-            MyDatecData.AirExterieur = curFrame.registersValues[4]/10
-            MyDatecData.AirInsufle = curFrame.registersValues[5]/10
+            MyDatecData['Statut']['TemperatureAir']['Extrait'] = curFrame.registersValues[2]/10
+            MyDatecData['Statut']['TemperatureAir']['Rejete'] = curFrame.registersValues[3]/10
+            MyDatecData['Statut']['TemperatureAir']['Exterieur'] = curFrame.registersValues[4]/10
+            MyDatecData['Statut']['TemperatureAir']['Insufle'] = curFrame.registersValues[5]/10
         
         if curFrame.isId(1,3,9036):
-            MyDatecData.TempsRestantFiltre = curFrame.registersValues[6]
+            MyDatecData['Statut']['Filtre']['TempsRestantFiltre'] = curFrame.registersValues[6]
         
         if curFrame.isId(1,3,16471):
-            MyDatecData.TempsFiltre = curFrame.registersValues[13]
+            MyDatecData['Statut']['Filtre']['TempsFiltre'] = curFrame.registersValues[13]
             
         if curFrame.isId(1,3,9053):
             log.error("C'est la trame de consomation ventilation !!!!")
@@ -262,11 +233,21 @@ class ew11Binding:
     def setTempAndModePDU(self, responseFrame):
         responseFrame.byteCount = 14
         self.mutex.acquire()
-        data = struct.pack("ff",self.config['t1'],self.config['t2'])
+        t1 = MyDatecData['Consigne']['Temperature']['ZoneJour']
+        t2 = MyDatecData['Consigne']['Temperature']['ZoneNuit']
+        pac = 1 if MyDatecData['Consigne']['Mode']['Pac'] else 0
+        froid = 1 if MyDatecData['Consigne']['Mode']['Froid'] else 0
+        boost = 1 if MyDatecData['Consigne']['Mode']['Boost'] else 0
+        print("T1    =",t1)
+        print("T2    =",t2)
+        print("Pac   =",pac)
+        print("Froid =",froid)
+        print("Boost =",boost)
+        data = struct.pack("ff",t1,t2)
         pData = struct.unpack('BBBBBBBB',data)
         responseFrame.pdu = struct.pack(">BBBBBBBBHHH",pData[1],pData[0],pData[3],pData[2],
                                                     pData[5],pData[4],pData[7],pData[6],
-                                                    self.config['pac'],self.config['cold'],self.config['boost'])
+                                                    pac,froid,boost)
         self.mutex.release()
 
     def join(self):

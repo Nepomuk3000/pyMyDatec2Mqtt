@@ -46,7 +46,8 @@ class ModbusFrame:
             self.function=self.data[1]
             if self.function > 0x80:
                 self.isRequest = False
-                log.todo("Traiter les réponses d'erreur de type : 65 83 02 812e")
+                hex_response = binascii.hexlify(self.data).decode('utf-8')  
+                log.todo(f"Traiter les réponses d'erreur de type : {hex_response}")
             elif self.function == 16:
                 self.startingAddr = self.data[2] << 8 | self.data[3]
                 self.quantity = self.data[4] << 8 | self.data[5]

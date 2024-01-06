@@ -1,7 +1,44 @@
 {
-  "t1": 20.0,
-  "t2": 22.0,
-  "pac": 1,
-  "cold": 0,
-  "boost": 0
+  "Statut": {
+    "ZoneNuit": {
+      "TemperatureBrute": 21.0,
+      "TemperatureEtalonnee": 21.1,
+      "HygrometrieBrute": 59,
+      "HygrometrieEtalonnee": 59,
+      "COV": 586
+    },
+    "ZoneJour": {
+      "TemperatureBrute": 22.9,
+      "TemperatureEtalonnee": -1,
+      "TemperatureEcran": 22.9,
+      "HygrometrieBrute": 47,
+      "HygrometrieEtalonnee": -1,
+      "COV": 1188
+    },
+    "TemperatureAir": {
+      "Extrait": 20.9,
+      "Rejete": 2.5,
+      "Exterieur": 9.8,
+      "Insufle": 48.3
+    },
+    "Filtre": {
+      "TempsFiltre": 180,
+      "TempsRestantFiltre": 179
+    },
+    "Etat": {
+      "Code": 2,
+      "Texte": "Chauffage"
+    }
+  },
+  "Consigne": {
+    "Mode": {
+      "Pac": 1,
+      "Froid": 0,
+      "Boost": 0
+    },
+    "Temperature": {
+      "ZoneJour": 20.0,
+      "ZoneNuit": 22.0
+    }
+  }
 }

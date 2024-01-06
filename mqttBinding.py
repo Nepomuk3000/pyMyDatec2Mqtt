@@ -6,6 +6,10 @@ import ew11Binding
 from MyDatecData import MyDatecData
 import threading
 import time
+import log
+
+def toBool(inByteArray):
+    return inByteArray in [b'True',b'true',b'1']
 
 class mqttBinding:
     
@@ -30,8 +34,7 @@ class mqttBinding:
         self.client.username_pw_set(username, password)
         self.client.connect(broker_address, broker_port, 60)
 
-        self.thread = threading.Thread(target=self.send)
-
+        self.thread = threading.Thread(target=self.sendMqttSatus)
         
         # Boucle principale du client
         self.client.loop_forever()
@@ -43,22 +46,32 @@ class mqttBinding:
         self.client.subscribe(self.topic)
         self.thread.start()
         
-    def send(self):
+    def sendMqttSatus(self):
         while True:
-            message = MyDatecData.toJson()
+            message = json.dumps(MyDatecData.data,indent=2)
             self.client.publish("mydatec/status", message)
+            MyDatecData.save()
             time.sleep(1)
 
     # Callback appelée lorsqu'un message est reçu du broker
     def on_message(self, client, userdata, msg):
-        if msg.topic == "mydatec/pac":
-            self.ew11Binding.setConfig("pac",msg.payload)
-        elif msg.topic == "mydatec/froid":
-            self.ew11Binding.setConfig("cold",msg.payload)
-        elif msg.topic == "mydatec/boost":
-            self.ew11Binding.setConfig("boost",msg.payload)
-        elif msg.topic == "mydatec/set":
-            self.process_binary_payload(msg.payload)
+        try:
+            if msg.topic == "mydatec/cmd/tJour":
+                MyDatecData['Consigne']['Temperature']['ZoneJour'] = float(msg.payload)
+            elif msg.topic == "mydatec/cmd/tNuit":
+                MyDatecData['Consigne']['Temperature']['ZoneNuit'] = float(msg.payload)
+            elif msg.topic == "mydatec/cmd/pac":
+                print(msg.payload)
+                print(bool(msg.payload))
+                MyDatecData['Consigne']['Mode']['Pac'] = toBool(msg.payload)
+            elif msg.topic == "mydatec/cmd/froid":
+                MyDatecData['Consigne']['Mode']['Froid'] = toBool(msg.payload)
+            elif msg.topic == "mydatec/cmd/boost":
+                MyDatecData['Consigne']['Mode']['Boost'] = toBool(msg.payload)
+            elif msg.topic == "mydatec/cmd/set":
+                self.process_binary_payload(msg.payload)
+        except Exception as e:
+            log.error(f"Le format de la payload est probblement erroné\nTopic : {msg.topic}\n{msg.payload}")
 
     # Fonction de traitement des données binaires
     def process_binary_payload(self, binary_data):
@@ -70,17 +83,17 @@ class mqttBinding:
         t1 =  donnees.get('t1', None)
         t2 =  donnees.get('t2', None)
         pac =  donnees.get('pac', None)
-        cold =  donnees.get('cold', None)
+        froid =  donnees.get('froid', None)
         boost =  donnees.get('boost', None)
 
         if t1 != None :
-            self.ew11Binding.setConfig("t1",t1)
+            MyDatecData['Consigne']['Temperature']['ZoneJour'] = t1
         if t2 != None :
-            self.ew11Binding.setConfig("t2",t2)
+            MyDatecData['Consigne']['Temperature']['ZoneNuit'] = t2
         if pac != None :
-            self.ew11Binding.setConfig("pac",pac)
-        if cold != None :
-            self.ew11Binding.setConfig("cold",cold)
+            MyDatecData['Consigne']['Mode']['Pac'] = pac
+        if froid != None :
+            MyDatecData['Consigne']['Mode']['Froid'] = froid
         if boost != None :
-            self.ew11Binding.setConfig("boost",boost)
+            MyDatecData['Consigne']['Mode']['Boost'] = boost
 
