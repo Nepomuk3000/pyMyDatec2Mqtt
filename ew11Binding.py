@@ -96,7 +96,7 @@ class ew11Binding:
                     curFrame = ModbusFrame()
 
             if ret == False:
-                log.error("ERREUR pas possible d'obtenir une frame valide")
+                log.warning("ERREUR pas possible d'obtenir une frame valide")
                 curFrame = ModbusFrame()
     
     def processRequest(self,curFrame):

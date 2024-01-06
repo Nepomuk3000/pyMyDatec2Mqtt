@@ -161,7 +161,11 @@ class ModbusFrame:
                     print(f"--   * registers values : [{self.registersValues}]")
                     print(f"--                        [{self.registersValuesToHex()}]")
                 else:
-                    txt = constants.registers[str(self.startingAddr)]
+                    try:
+                        txt = constants.registers[self.slave][self.startingAddr]
+                    except:
+                        txt = f"Unknown register name for slave {self.slave} address : 0x{self.startingAddr:04X} ({self.startingAddr})"
+                        log.error(txt)
                     print(f"--   * starting address : 0x{self.startingAddr:04X} ({self.startingAddr}) {txt}")
                     print(f"--   * quantity         : {self.quantity}")
             else:
@@ -178,9 +182,9 @@ class ModbusFrame:
                 startingAddr = self.request.startingAddr
             
         try:
-            txt = constants.registers[str(startingAddr)]
+            txt = constants.registers[self.slave][startingAddr]
         except:
-            txt = f"Unknown register name for address : 0x{startingAddr:04X}"
+            txt = f"Unknown register name for slave {self.slave} address : 0x{startingAddr:04X} ({self.startingAddr})"
             log.error(txt)
         return (f"0x{startingAddr:04X} ({startingAddr})  {txt}")
             
