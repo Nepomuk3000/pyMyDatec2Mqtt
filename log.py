@@ -10,7 +10,10 @@ def error(inStr):
         errLogFile.write(inStr + '\n')
 
 def warning(inStr):
-    print(f"{Back.RED}{Fore.BLACK}ERROR : {inStr}{Style.RESET_ALL}")
+    print(f"{Back.LIGHTRED_EX}{Fore.BLACK}WARNING : {inStr}{Style.RESET_ALL}")
+
+def info(inStr):
+    print(f"{Fore.BLUE}INFO : {inStr}{Style.RESET_ALL}")
     
 def dbg(inStr):
     print(f"{Back.GREEN}{Fore.BLACK}DBG : {inStr}{Style.RESET_ALL}")

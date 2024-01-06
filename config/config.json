@@ -1,25 +1,29 @@
 {
   "Statut": {
     "ZoneNuit": {
-      "TemperatureBrute": 21.0,
+      "TemperatureBrute": 21.1,
       "TemperatureEtalonnee": 21.1,
       "HygrometrieBrute": 59,
       "HygrometrieEtalonnee": 59,
-      "COV": 586
+      "COV": 481,
+      "RechauffeurOuvert": 1,
+      "RechauffeurChauffe": 0
     },
     "ZoneJour": {
-      "TemperatureBrute": 22.9,
-      "TemperatureEtalonnee": -1,
-      "TemperatureEcran": 22.9,
+      "TemperatureBrute": 23.0,
+      "TemperatureEtalonnee": 20.7,
+      "TemperatureEcran": 23.0,
       "HygrometrieBrute": 47,
-      "HygrometrieEtalonnee": -1,
-      "COV": 1188
+      "HygrometrieEtalonnee": 47,
+      "COV": 969,
+      "RechauffeurOuvert": 0,
+      "RechauffeurChauffe": 0
     },
     "TemperatureAir": {
-      "Extrait": 20.9,
+      "Extrait": 21.3,
       "Rejete": 2.5,
-      "Exterieur": 9.8,
-      "Insufle": 48.3
+      "Exterieur": 9.3,
+      "Insufle": 51.1
     },
     "Filtre": {
       "TempsFiltre": 180,

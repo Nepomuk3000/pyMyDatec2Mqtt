@@ -96,7 +96,7 @@ class ew11Binding:
                     curFrame = ModbusFrame()
 
             if ret == False:
-                log.warning("ERREUR pas possible d'obtenir une frame valide")
+                log.info("Des données ont été droppées")
                 curFrame = ModbusFrame()
     
     def processRequest(self,curFrame):
@@ -176,12 +176,31 @@ class ew11Binding:
                 MyDatecData['Consigne']['Mode']['Boost'] = val
                 self.precBoostConsigneEcran = val        
                 
+        # Traitement de la commande d'ouverture / fermeture du réchaufeur zone jour
+        elif curFrame.isId(101,16,4):
+            MyDatecData['Statut']['ZoneJour']['RechauffeurOuvert'] = curFrame.registersValues[0]
+            
+        # Traitement de la commande d'activation / désactivation du réchaufeur zone jour
+        elif curFrame.isId(101,16,5):
+            MyDatecData['Statut']['ZoneJour']['RechauffeurChauffe'] = curFrame.registersValues[0]
+            
+        # Traitement de la commande d'ouverture / fermeture du réchaufeur zone nuit
+        elif curFrame.isId(102,16,4):
+            MyDatecData['Statut']['ZoneNuit']['RechauffeurOuvert'] = curFrame.registersValues[0]
+            
+        # Traitement de la commande d'activation / désactivation du réchaufeur zone nuit
+        elif curFrame.isId(102,16,5):
+            MyDatecData['Statut']['ZoneNuit']['RechauffeurChauffe'] = curFrame.registersValues[0]
+                
     def processResponse(self,curFrame):  
         
         # Réponse du capteur de la zone Jour
         if curFrame.isId(11,3,4):
             MyDatecData['Statut']['ZoneJour']['TemperatureBrute'] = curFrame.registersValues[0]/10
+            log.todo("Récupérer l'étalonnage ou la température étalonnée depuis le bus")
+            MyDatecData['Statut']['ZoneJour']['TemperatureEtalonnee'] = curFrame.registersValues[0]/10 - 2.3
             MyDatecData['Statut']['ZoneJour']['HygrometrieBrute'] = curFrame.registersValues[1]
+            MyDatecData['Statut']['ZoneJour']['HygrometrieEtalonnee'] = curFrame.registersValues[1]
             MyDatecData['Statut']['ZoneJour']['COV'] = curFrame.registersValues[2]
         
         # Réponse du capteur de la zone Nuit
@@ -238,11 +257,6 @@ class ew11Binding:
         pac = 1 if MyDatecData['Consigne']['Mode']['Pac'] else 0
         froid = 1 if MyDatecData['Consigne']['Mode']['Froid'] else 0
         boost = 1 if MyDatecData['Consigne']['Mode']['Boost'] else 0
-        print("T1    =",t1)
-        print("T2    =",t2)
-        print("Pac   =",pac)
-        print("Froid =",froid)
-        print("Boost =",boost)
         data = struct.pack("ff",t1,t2)
         pData = struct.unpack('BBBBBBBB',data)
         responseFrame.pdu = struct.pack(">BBBBBBBBHHH",pData[1],pData[0],pData[3],pData[2],

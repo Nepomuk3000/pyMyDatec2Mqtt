@@ -47,7 +47,7 @@ class ModbusFrame:
             if self.function > 0x80:
                 self.isRequest = False
                 hex_response = binascii.hexlify(self.data).decode('utf-8')  
-                log.todo(f"Traiter les réponses d'erreur de type : {hex_response}")
+                log.info(f"Une erreur a été remontée par un slave : {hex_response}")
             elif self.function == 16:
                 self.startingAddr = self.data[2] << 8 | self.data[3]
                 self.quantity = self.data[4] << 8 | self.data[5]
@@ -113,13 +113,15 @@ class ModbusFrame:
                 addr = -1
         return f"{self.slave}_{self.function}_{addr}_{self.isRequest}"
 
-    def isId(self,slave=None,function=None,startingAddr=None):
+    def isId(self,slave=None,function=None,startingAddr=None,isRequest=None):
         ret = True
-        if slave:
+        if isRequest != None:
+            ret &= self.isRequest == isRequest
+        if slave != None:
             ret &= self.slave == slave
-        if function:
+        if function != None:
             ret &= self.function == function
-        if startingAddr:
+        if startingAddr != None:
             if self.isRequest:
                 ret &= self.startingAddr == startingAddr
             else:
@@ -129,8 +131,8 @@ class ModbusFrame:
                     ret = False
         return ret
 
-    def print(self,slave=None,function=None,startingAddr=None):
-        if not self.isId(slave,function,startingAddr):
+    def print(self,slave=None,function=None,startingAddr=None,isRequest=None):
+        if not self.isId(slave,function,startingAddr,isRequest):
             return
         hex_data = binascii.hexlify(self.data).decode('utf-8')
         # TODO Mettre un filtre configurable 
