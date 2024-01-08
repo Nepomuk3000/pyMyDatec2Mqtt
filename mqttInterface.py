@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 import binascii
 from struct import *
 import json
-import ew11Binding
+import ew11Interface
 from MyDatecData import MyDatecData
 import threading
 import time
@@ -11,7 +11,7 @@ import log
 def toBool(inByteArray):
     return inByteArray in [b'True',b'true',b'1']
 
-class mqttBinding:
+class mqttInterface:
     
     def __init__ (self, inEw11Binding):
         
@@ -19,7 +19,7 @@ class mqttBinding:
         broker_address = "192.168.1.107"
         broker_port = 1883
         self.topic = "mydatec/#"
-        self.ew11Binding = inEw11Binding
+        self.ew11Interface = inEw11Binding
         username = "pi"
         password = "xxxxxxxx"
 
@@ -61,8 +61,6 @@ class mqttBinding:
             elif msg.topic == "mydatec/cmd/tNuit":
                 MyDatecData['Consigne']['Temperature']['ZoneNuit'] = float(msg.payload)
             elif msg.topic == "mydatec/cmd/pac":
-                print(msg.payload)
-                print(bool(msg.payload))
                 MyDatecData['Consigne']['Mode']['Pac'] = toBool(msg.payload)
             elif msg.topic == "mydatec/cmd/froid":
                 MyDatecData['Consigne']['Mode']['Froid'] = toBool(msg.payload)

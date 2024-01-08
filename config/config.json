@@ -1,37 +1,37 @@
 {
   "Statut": {
     "ZoneNuit": {
-      "TemperatureBrute": 21.1,
-      "TemperatureEtalonnee": 21.1,
-      "HygrometrieBrute": 59,
-      "HygrometrieEtalonnee": 59,
-      "COV": 481,
-      "RechauffeurOuvert": 1,
-      "RechauffeurChauffe": 0
-    },
-    "ZoneJour": {
-      "TemperatureBrute": 23.0,
-      "TemperatureEtalonnee": 20.7,
-      "TemperatureEcran": 23.0,
-      "HygrometrieBrute": 47,
-      "HygrometrieEtalonnee": 47,
-      "COV": 969,
+      "TemperatureBrute": 19.7,
+      "TemperatureEtalonnee": 19.7,
+      "HygrometrieBrute": 57,
+      "HygrometrieEtalonnee": 57,
+      "COV": 1151,
       "RechauffeurOuvert": 0,
       "RechauffeurChauffe": 0
     },
+    "ZoneJour": {
+      "TemperatureBrute": 21.7,
+      "TemperatureEtalonnee": 19.4,
+      "TemperatureEcran": 21.7,
+      "HygrometrieBrute": 38,
+      "HygrometrieEtalonnee": 38,
+      "COV": 951,
+      "RechauffeurOuvert": 1,
+      "RechauffeurChauffe": 0
+    },
     "TemperatureAir": {
-      "Extrait": 21.3,
-      "Rejete": 2.5,
-      "Exterieur": 9.3,
-      "Insufle": 51.1
+      "Extrait": 20.4,
+      "Rejete": 2.6,
+      "Exterieur": 5.7,
+      "Insufle": 38.8
     },
     "Filtre": {
       "TempsFiltre": 180,
-      "TempsRestantFiltre": 179
+      "TempsRestantFiltre": 177
     },
     "Etat": {
-      "Code": 2,
-      "Texte": "Chauffage"
+      "Code": 1,
+      "Texte": "Tempo Chauffage"
     }
   },
   "Consigne": {
@@ -42,7 +42,7 @@
     },
     "Temperature": {
       "ZoneJour": 20.0,
-      "ZoneNuit": 22.0
+      "ZoneNuit": 19.5
     }
   }
 }

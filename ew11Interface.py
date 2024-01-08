@@ -10,7 +10,7 @@ from ModbusFrame import ModbusFrame
 from colorama import Fore, Back, Style
 from MyDatecData import MyDatecData
         
-class ew11Binding:
+class ew11Interface:
     showDataChanges = False
     showRegisters = False
     
@@ -71,7 +71,7 @@ class ew11Binding:
                         curFrame.request = self.previousReq
                         
                     # Si c'est demandé, afficher les données qui on changées d'une occurence d'une frame à l'autre
-                    if ew11Binding.showDataChanges:
+                    if ew11Interface.showDataChanges:
                         idx = curFrame.getIdStr()
                         try :
                             if precFrame[idx].crc != curFrame.crc:
@@ -81,7 +81,7 @@ class ew11Binding:
                         precFrame[idx] = curFrame
 
                     # Si demandé, afficher les données des frame qui ont des registres renseignés
-                    if ew11Binding.showRegisters:
+                    if ew11Interface.showRegisters:
                         if len(curFrame.registersValues) > 0:
                             print(f"{Fore.BLUE}{curFrame.getIdStr()} / {curFrame.startingAddrToStr()}{Style.RESET_ALL}")
                             print(curFrame.registersValues)

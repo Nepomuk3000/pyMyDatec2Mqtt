@@ -44,7 +44,10 @@ status = {
     0:'Ventilation',
     1:'Tempo Chauffage',
     2:'Chauffage',
-    3:'Free Cooling'   
+    3:'Free Cooling',
+    4:'AD 4',
+    5:'AD 5',
+    6:'Dégivrage'
 }
 
 registers = {
