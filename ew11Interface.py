@@ -157,21 +157,21 @@ class ew11Interface:
         
         # Traitement de la consigne pac ON / pac OFF par l'écran
         elif curFrame.isId(1,startingAddr=16476):   
-            val = curFrame.registersValues[0]
+            val = True if  curFrame.registersValues[0] else False
             if self.precPacConsigneEcran != val:
                 MyDatecData['Consigne']['Mode']['Pac'] = val
                 self.precPacConsigneEcran = val
 
         # Traitement de la consigne froid / chaud par l'écran
         elif curFrame.isId(startingAddr=16477):
-            val = curFrame.registersValues[0]
+            val = True if curFrame.registersValues[0] else False
             if self.precColdConsigneEcran != val:
                 MyDatecData['Consigne']['Mode']['Froid'] = val
                 self.precColdConsigneEcran = val
 
         # Traitement de la consigne boost ON / boost OFF par l'écran
         elif curFrame.isId(startingAddr=16478):
-            val = curFrame.registersValues[0]
+            val = True if curFrame.registersValues[0] else False
             if self.precBoostConsigneEcran != val:
                 MyDatecData['Consigne']['Mode']['Boost'] = val
                 self.precBoostConsigneEcran = val        

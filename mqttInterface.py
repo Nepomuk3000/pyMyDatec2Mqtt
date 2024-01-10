@@ -6,6 +6,7 @@ import ew11Interface
 from MyDatecData import MyDatecData
 import threading
 import time
+from datetime import datetime
 import log
 
 def toBool(inByteArray):
@@ -48,6 +49,8 @@ class mqttInterface:
         
     def sendMqttSatus(self):
         while True:
+            dateStr=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            MyDatecData['date']=dateStr
             message = json.dumps(MyDatecData.data,indent=2)
             self.client.publish("mydatec/status", message)
             MyDatecData.save()

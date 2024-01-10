@@ -47,7 +47,10 @@ status = {
     3:'Free Cooling',
     4:'AD 4',
     5:'AD 5',
-    6:'Dégivrage'
+    6:'Dégivrage',
+    7:'AD',
+    8:'AD',
+    9:'ERR 2 Sécurité HP'
 }
 
 registers = {
