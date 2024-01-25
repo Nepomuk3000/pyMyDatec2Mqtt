@@ -18,7 +18,7 @@ class MyDatecDataClass:
         
     def load(self):
         with open('config/config.json', 'r') as jsonfile:
-                self.data = json.load(jsonfile)
+            self.data = json.load(jsonfile)
         
     def save(self):
         with open('config/config.json', 'w') as jsonfile:

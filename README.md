@@ -122,11 +122,14 @@ The start script (./scripts/start.sh) starts the daemon in nohup mode
 
 <!-- ROADMAP -->
 ## TODO
-- [] Récupérer l'étalonnage ou la température étalonnée de la sonde de la zone de jour depuis le bus. Actuellement -2.3 en dur dans le code 
-- [] Implémenter une remontée d'erreur en MQTT
-- [] Implementer le protocole MQTT homeassistant
-- [] Permettre le paramétrage du sereur TCP
-- [] Documenter la configuration de Elfin EW11
+[] Récupérer l'étalonnage ou la température étalonnée de la sonde de la zone de jour depuis le bus. Actuellement -2.3 en dur dans le code 
+[] Implémenter une remontée d'erreur en MQTT
+[] Implementer le protocole MQTT homeassistant
+[] Permettre le paramétrage du sereur TCP
+[] Documenter la configuration de Elfin EW11
+[] Ameliorer la prise en compte de la consigne (conflit entre serveur mqtt et écran myDatec)
+[] Commander la gestion de l'humidité et des COV /!\ Contrairement à ce qui est indiqué dans le document ne semblent pas remonter par 16493,16494
+[] Lire et remonter les consommations /!\ Contrairement à ce qui est indiqué dans le document ne semblent pas remonter par 9049,9051,9053,9055
 
 See the [open issues](https://github.com/nepomuk3000/pyMyDatec2Mqtt/issues) for a full list of proposed features (and known issues).
 
