@@ -9,9 +9,10 @@ import constants
 from ModbusFrame import ModbusFrame
 from colorama import Fore, Back, Style
 from MyDatecData import MyDatecData
-        
+from ctypes import c_ushort, c_short
+
 class ew11Interface:
-    showDataChanges = False
+    showDataChanges = False 
     showRegisters = False
     
     def __init__(self, inHost='0.0.0.0', inPort=10004):
@@ -101,7 +102,7 @@ class ew11Interface:
     
     def processRequest(self,curFrame):
         self.previousReq = curFrame            
-        # On ne remplace que le slave 247. On ne prépare les réponses qui lui sont associées 
+        # On ne remplace que le slave 247. On ne prépare que les réponses qui lui sont associées 
         if curFrame.isId(247):                       
             responseFrame = ModbusFrame()
             responseFrame.isRequest = False
@@ -121,7 +122,7 @@ class ew11Interface:
                 try:
                     statusStr=constants.status[statusCode]
                 except:
-                    txt="Unknown"
+                    statusStr="Unknown"
                 MyDatecData['Statut']['Etat']['Code']=statusCode
                 MyDatecData['Statut']['Etat']['Texte']=statusStr
             data = responseFrame.to_bytes()
@@ -196,25 +197,25 @@ class ew11Interface:
         
         # Réponse du capteur de la zone Jour
         if curFrame.isId(11,3,4):
-            MyDatecData['Statut']['ZoneJour']['TemperatureBrute'] = curFrame.registersValues[0]/10
+            MyDatecData['Statut']['ZoneJour']['TemperatureBrute'] = c_short(curFrame.registersValues[0]).value/10
             log.todo("Récupérer l'étalonnage ou la température étalonnée depuis le bus")
-            MyDatecData['Statut']['ZoneJour']['TemperatureEtalonnee'] = curFrame.registersValues[0]/10 - 2.3
+            MyDatecData['Statut']['ZoneJour']['TemperatureEtalonnee'] = c_short(curFrame.registersValues[0]).value/10 - 2.3
             MyDatecData['Statut']['ZoneJour']['HygrometrieBrute'] = curFrame.registersValues[1]
             MyDatecData['Statut']['ZoneJour']['HygrometrieEtalonnee'] = curFrame.registersValues[1]
             MyDatecData['Statut']['ZoneJour']['COV'] = curFrame.registersValues[2]
         
         # Réponse du capteur de la zone Nuit
         if curFrame.isId(12,3,4):
-            MyDatecData['Statut']['ZoneNuit']['TemperatureBrute'] = curFrame.registersValues[0]/10
+            MyDatecData['Statut']['ZoneNuit']['TemperatureBrute'] = c_short(curFrame.registersValues[0]).value/10
             MyDatecData['Statut']['ZoneNuit']['HygrometrieBrute'] = curFrame.registersValues[1]
             MyDatecData['Statut']['ZoneNuit']['COV'] = curFrame.registersValues[2]
         
         # Réponse de la VMC concernant les températures en entrée et sortie
         if curFrame.isId(1,3,9002):
-            MyDatecData['Statut']['TemperatureAir']['Extrait'] = curFrame.registersValues[2]/10
-            MyDatecData['Statut']['TemperatureAir']['Rejete'] = curFrame.registersValues[3]/10
-            MyDatecData['Statut']['TemperatureAir']['Exterieur'] = curFrame.registersValues[4]/10
-            MyDatecData['Statut']['TemperatureAir']['Insufle'] = curFrame.registersValues[5]/10
+            MyDatecData['Statut']['TemperatureAir']['Extrait'] = c_short(curFrame.registersValues[2]).value/10
+            MyDatecData['Statut']['TemperatureAir']['Rejete'] = c_short(curFrame.registersValues[3]).value/10
+            MyDatecData['Statut']['TemperatureAir']['Exterieur'] = c_short(curFrame.registersValues[4]).value/10
+            MyDatecData['Statut']['TemperatureAir']['Insufle'] = c_short(curFrame.registersValues[5]).value/10
         
         if curFrame.isId(1,3,9036):
             MyDatecData['Statut']['Filtre']['TempsRestantFiltre'] = curFrame.registersValues[6]
