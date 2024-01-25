@@ -1,48 +1,50 @@
 {
   "Statut": {
     "ZoneNuit": {
-      "TemperatureBrute": 19.7,
-      "TemperatureEtalonnee": 19.7,
-      "HygrometrieBrute": 57,
-      "HygrometrieEtalonnee": 57,
-      "COV": 1151,
+      "TemperatureBrute": 21.1,
+      "TemperatureEtalonnee": 21.1,
+      "HygrometrieBrute": 65,
+      "HygrometrieEtalonnee": 65,
+      "COV": 873,
       "RechauffeurOuvert": 0,
       "RechauffeurChauffe": 0
     },
     "ZoneJour": {
-      "TemperatureBrute": 21.7,
-      "TemperatureEtalonnee": 19.4,
-      "TemperatureEcran": 21.7,
-      "HygrometrieBrute": 38,
-      "HygrometrieEtalonnee": 38,
-      "COV": 951,
-      "RechauffeurOuvert": 1,
+      "TemperatureBrute": 23.3,
+      "TemperatureEtalonnee": 21.0,
+      "TemperatureEcran": 23.3,
+      "HygrometrieBrute": 65,
+      "HygrometrieEtalonnee": 65,
+      "COV": 621,
+      "RechauffeurOuvert": 0,
       "RechauffeurChauffe": 0
     },
     "TemperatureAir": {
-      "Extrait": 20.4,
-      "Rejete": 2.6,
-      "Exterieur": 5.7,
-      "Insufle": 38.8
+      "Extrait": 20.8,
+      "Rejete": 16.6,
+      "Exterieur": 12.3,
+      "Insufle": 19.5
     },
     "Filtre": {
       "TempsFiltre": 180,
-      "TempsRestantFiltre": 177
+      "TempsRestantFiltre": 160
     },
     "Etat": {
-      "Code": 1,
-      "Texte": "Tempo Chauffage"
+      "Code": 0,
+      "Texte": "Ventilation"
     }
   },
   "Consigne": {
     "Mode": {
-      "Pac": 1,
-      "Froid": 0,
-      "Boost": 0
+      "Pac": false,
+      "Froid": false,
+      "Boost": false
     },
     "Temperature": {
       "ZoneJour": 20.0,
-      "ZoneNuit": 19.5
+      "ZoneNuit": 20.0
     }
-  }
+  },
+  "date": "2024-01-26 00:11:01",
+  "Erreurs": []
 }

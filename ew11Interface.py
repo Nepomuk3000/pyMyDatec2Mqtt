@@ -10,6 +10,7 @@ from ModbusFrame import ModbusFrame
 from colorama import Fore, Back, Style
 from MyDatecData import MyDatecData
 from ctypes import c_ushort, c_short
+from datetime import datetime, timedelta
 
 class ew11Interface:
     showDataChanges = False 
@@ -36,6 +37,8 @@ class ew11Interface:
         self.precPacConsigneEcran = -1
         self.precColdConsigneEcran = -1
         self.precBoostConsigneEcran = -1
+        
+        self.overheatInsufle = False
     
     def start(self):
         self.thread.start()
@@ -224,16 +227,16 @@ class ew11Interface:
             MyDatecData['Statut']['Filtre']['TempsFiltre'] = curFrame.registersValues[13]
             
         if curFrame.isId(1,3,9053):
-            log.error("C'est la trame de consomation ventilation !!!!")
+            self.setError("C'est la trame de consomation ventilation !!!!",9053)
             
         if curFrame.isId(1,3,9051):
-            log.error("C'est la trame de consomation chauffage !!!!")
+            self.setError("C'est la trame de consomation chauffage !!!!",9051)
             
         if curFrame.isId(1,3,9055):
-            log.error("C'est la trame de consomation freecoolng !!!!")
+            self.setError("C'est la trame de consomation freecoolng !!!!",9055)
             
         if curFrame.isId(1,3,9049):
-            log.error(f"C'est la trame de consomation raffraichissement !!!! \n{curFrame.registersValues}\n{curFrame.registersValuesToHex()}")
+            self.setError("C'est la trame de consomation raffraichissement !!!!",9049)
 
 
     def printDataChanges(self, curFrame, precFrame):
@@ -250,14 +253,43 @@ class ew11Interface:
         print("Now        :",curFrame.registersValuesToHex())
         print("########################################################################################################################")
 
+    def setError(self, errorText, errorCode=0):
+        # Ecrire l'erreur
+        dateNow = datetime.now().isoformat()
+        MyDatecData['Erreurs'].append({"date":dateNow,"code":errorCode,"texte":errorText})
+        # Supprimer les erreurs plus vieilles de 10 jours
+        tenDays = timedelta(seconds=10)
+        MyDatecErrors = [objet for objet in  MyDatecData['Erreurs'] if datetime.fromisoformat(dateNow) - datetime.fromisoformat(objet['date']) <= tenDays]
+        MyDatecData['Erreurs'] = MyDatecErrors
+
     def setTempAndModePDU(self, responseFrame):
+        # Si la température d'air insuflé est suppérieure de 56.6°C
+        if MyDatecData['Statut']['TemperatureAir']['Insufle'] > 56.6 and self.overheatInsufle == False:
+            # Mémoriser l'anomalie de trop haute température d'air insuflé et la remonter en MQTT
+            self.setError("Température d'air insuflé trop élevée, arrêt de la PAC et du Boost",4)
+            self.overheatInsufle = True
+        # Sinon, si la température d'air insuflé est inférieure à 50°C
+        elif MyDatecData['Statut']['TemperatureAir']['Insufle'] < 50 and self.overheatInsufle == True:
+            # Oublier l'anomalie de trop haute température d'air insuflé
+            self.overheatInsufle = False
+        # Fin si
+
+        # Si la température d'air insuflé est trop haute
+        if self.overheatInsufle:
+            # Forcer l'arrêt de la PAC et du Boost
+            pac = 0
+            boost = 0
+        else: # Sinon
+            # Utiliser les paramètres de consigne pour la PAC et le Boost
+            pac = 1 if MyDatecData['Consigne']['Mode']['Pac'] else 0
+            boost = 1 if MyDatecData['Consigne']['Mode']['Boost'] else 0
+        # Fin si
+            
+        froid = 1 if MyDatecData['Consigne']['Mode']['Froid'] else 0
         responseFrame.byteCount = 14
         self.mutex.acquire()
         t1 = MyDatecData['Consigne']['Temperature']['ZoneJour']
         t2 = MyDatecData['Consigne']['Temperature']['ZoneNuit']
-        pac = 1 if MyDatecData['Consigne']['Mode']['Pac'] else 0
-        froid = 1 if MyDatecData['Consigne']['Mode']['Froid'] else 0
-        boost = 1 if MyDatecData['Consigne']['Mode']['Boost'] else 0
         data = struct.pack("ff",t1,t2)
         pData = struct.unpack('BBBBBBBB',data)
         responseFrame.pdu = struct.pack(">BBBBBBBBHHH",pData[1],pData[0],pData[3],pData[2],

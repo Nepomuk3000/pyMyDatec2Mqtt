@@ -123,7 +123,7 @@ The start script (./scripts/start.sh) starts the daemon in nohup mode
 <!-- ROADMAP -->
 ## TODO
 [] Récupérer l'étalonnage ou la température étalonnée de la sonde de la zone de jour depuis le bus. Actuellement -2.3 en dur dans le code 
-[] Implémenter une remontée d'erreur en MQTT
+[x] Implémenter une remontée d'erreur en MQTT
 [] Implementer le protocole MQTT homeassistant
 [] Permettre le paramétrage du sereur TCP
 [] Documenter la configuration de Elfin EW11
