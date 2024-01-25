@@ -50,7 +50,10 @@ status = {
     6:'Dégivrage',
     7:'AD',
     8:'AD',
-    9:'ERR 2 Sécurité HP'
+    9:'ERR 2 Sécurité HP',
+    10:'ERR 3',
+    11:'ERR 4 Température air insuflé',
+    42:'Humidification'
 }
 
 registers = {
