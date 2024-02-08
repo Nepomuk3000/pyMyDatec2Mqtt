@@ -8,12 +8,13 @@ do
     then
         if [ $cpt -le 5 ]
         then
-            echo "On essaye de tuer $PID proprement"
             PID=`netstat -lnp 2> /dev/null | grep 10004 | sed "s@  *@/@g" | cut -d"/" -f7 `
+            echo "On essaye de tuer $PID proprement"
             kill $PID
         else
             echo "On tue $PID salement"
             kill -9 $PID 2> /dev/null
+	    stop=1
         fi
     else
         stop=1
