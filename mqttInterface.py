@@ -54,7 +54,7 @@ class mqttInterface:
             message = json.dumps(MyDatecData.data,indent=2)
             self.client.publish("mydatec/status", message)
             MyDatecData.save()
-            time.sleep(1)
+            time.sleep(10)
 
     # Callback appelée lorsqu'un message est reçu du broker
     def on_message(self, client, userdata, msg):
