@@ -132,7 +132,7 @@ class ew11Interface:
             self.client_socket.send(data)
         
         # Traitement de l'information température interne de l'écran
-        if curFrame.isId(1,16,9048):
+        elif curFrame.isId(1,16,9048):
             MyDatecData['Statut']['ZoneJour']['TemperatureEcran'] = curFrame.registersValues[0]/10
             
         elif curFrame.isId(1,16,9070):
@@ -140,7 +140,7 @@ class ew11Interface:
             
         elif curFrame.isId(1,16,9071):
             MyDatecData['Statut']['ZoneNuit']['HygrometrieEtalonnee'] = curFrame.registersValues[0]
-            
+        # TODO Resoudre les conflits de consignes entre l'ecran et l'appli
         # Traitement de la consigne de température zone jour par l'écran
         elif curFrame.isId(1,16,16471):  
             bytes_data = struct.pack('<' + 'H' * len(curFrame.registersValues), *curFrame.registersValues)
@@ -195,7 +195,10 @@ class ew11Interface:
         # Traitement de la commande d'activation / désactivation du réchaufeur zone nuit
         elif curFrame.isId(102,16,5):
             MyDatecData['Statut']['ZoneNuit']['RechauffeurChauffe'] = curFrame.registersValues[0]
-                
+        #else:
+        #    curFrame.print()
+
+
     def processResponse(self,curFrame):  
         
         # Réponse du capteur de la zone Jour
@@ -208,36 +211,37 @@ class ew11Interface:
             MyDatecData['Statut']['ZoneJour']['COV'] = curFrame.registersValues[2]
         
         # Réponse du capteur de la zone Nuit
-        if curFrame.isId(12,3,4):
+        elif curFrame.isId(12,3,4):
             MyDatecData['Statut']['ZoneNuit']['TemperatureBrute'] = c_short(curFrame.registersValues[0]).value/10
             MyDatecData['Statut']['ZoneNuit']['HygrometrieBrute'] = curFrame.registersValues[1]
             MyDatecData['Statut']['ZoneNuit']['COV'] = curFrame.registersValues[2]
         
         # Réponse de la VMC concernant les températures en entrée et sortie
-        if curFrame.isId(1,3,9002):
+        elif curFrame.isId(1,3,9002):
             MyDatecData['Statut']['TemperatureAir']['Extrait'] = c_short(curFrame.registersValues[2]).value/10
             MyDatecData['Statut']['TemperatureAir']['Rejete'] = c_short(curFrame.registersValues[3]).value/10
             MyDatecData['Statut']['TemperatureAir']['Exterieur'] = c_short(curFrame.registersValues[4]).value/10
             MyDatecData['Statut']['TemperatureAir']['Insufle'] = c_short(curFrame.registersValues[5]).value/10
         
-        if curFrame.isId(1,3,9036):
+        elif curFrame.isId(1,3,9036):
             MyDatecData['Statut']['Filtre']['TempsRestantFiltre'] = curFrame.registersValues[6]
         
-        if curFrame.isId(1,3,16471):
+        elif curFrame.isId(1,3,16471):
             MyDatecData['Statut']['Filtre']['TempsFiltre'] = curFrame.registersValues[13]
             
-        if curFrame.isId(1,3,9053):
+        elif curFrame.isId(1,3,9053):
             self.setError("C'est la trame de consomation ventilation !!!!",9053)
             
-        if curFrame.isId(1,3,9051):
+        elif curFrame.isId(1,3,9051):
             self.setError("C'est la trame de consomation chauffage !!!!",9051)
             
-        if curFrame.isId(1,3,9055):
+        elif curFrame.isId(1,3,9055):
             self.setError("C'est la trame de consomation freecoolng !!!!",9055)
             
-        if curFrame.isId(1,3,9049):
+        elif curFrame.isId(1,3,9049):
             self.setError("C'est la trame de consomation raffraichissement !!!!",9049)
-
+        #else:
+        #    curFrame.print()
 
     def printDataChanges(self, curFrame, precFrame):
         print("########################################################################################################################")

@@ -42,10 +42,10 @@ class mqttInterface:
 
     # Callback appelée lorsqu'une connexion au broker est établie
     def on_connect(self, client, userdata, flags, rc):
-        print(f"Connecté au broker avec le code de retour {rc}")
-        # Abonnez-vous au topic
+        log.info(f"Connecté au broker avec le code de retour {rc}")
         self.client.subscribe(self.topic)
-        self.thread.start()
+        if not self.thread.is_alive():
+            self.thread.start()
         
     def sendMqttSatus(self):
         while True:
