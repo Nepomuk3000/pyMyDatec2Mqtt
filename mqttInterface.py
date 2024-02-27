@@ -8,6 +8,7 @@ import threading
 import time
 from datetime import datetime
 import log
+import os
 
 def toBool(inByteArray):
     return inByteArray in [b'True',b'true',b'1']
@@ -21,8 +22,15 @@ class mqttInterface:
         broker_port = 1883
         self.topic = "mydatec/#"
         self.ew11Interface = inEw11Binding
-        username = "pi"
-        password = "xxxxxxxx"
+        # Ouvrir le fichier JSON en mode lecture
+        path = os.path.dirname(os.path.abspath(__file__))
+        with open(path + '/config/credentials.json', 'r') as fichier:
+            # Charger les données JSON à partir du fichier
+            data = json.load(fichier)
+
+            # Accéder aux valeurs des champs "user" et "passwd"
+            username = data["user"]
+            password = data["password"]
 
         # Création d'un client MQTT
         self.client = mqtt.Client()
